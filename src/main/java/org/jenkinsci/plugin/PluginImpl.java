@@ -1,4 +1,4 @@
-package com.cloudera.recycler;
+package org.jenkinsci.plugin;
 
 import hudson.Plugin;
 import hudson.model.AbstractBuild;

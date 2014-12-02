@@ -1,4 +1,4 @@
-package com.cloudera.recycler;
+package org.jenkinsci.plugin;
 
 
 import hudson.AbortException;
@@ -43,7 +43,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * @author Manoj Thakkar
  *
  */
-public class diskrecycler extends BuildWrapper {
+public class Diskcheck extends BuildWrapper {
 	public boolean diskcheck;
     /**
      * Stored build steps to run before the scm  checkout is called
@@ -60,7 +60,7 @@ public class diskrecycler extends BuildWrapper {
      * @param buildstep list of but steps configured in the UI
      */
   @DataBoundConstructor
-    public diskrecycler(boolean failOnError, boolean diskcheck ) {
+    public Diskcheck(boolean failOnError, boolean diskcheck ) {
 	//   ArrayList myCommand = new ArrayList();
 	//   myCommand.add("du-sh $WORKSPACE");
 	//   this.buildSteps=myCommand;
