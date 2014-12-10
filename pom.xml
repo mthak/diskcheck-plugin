@@ -19,14 +19,27 @@
     </license>
   </licenses>
 
-  <dependencies>
-	<dependency>
-		<groupId>org.mongodb</groupId>
-		<artifactId>mongo-java-driver</artifactId>
-		<version>2.12.3</version>
-	</dependency>
-  </dependencies>
-  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
+<distributionManagement>
+   <repository>
+    <id>maven.jenkins-ci.org</id>
+    <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+   </repository>
+  </distributionManagement>
+
+  <developers>
+    <developer>
+      <id>mthak</id>
+      <name>Manoj Thakkar</name>
+      <email>mthakkar@cloudera.com</email>
+    </developer>
+  </developers>
+
+<scm>
+    <connection>scm:git:git://github.com/jenkinsci/diskcheck-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/diskcheck-plugin.git</developerConnection>
+    <url>http://github.com/jenkinsci/diskcheck-plugin</url>
+  </scm>
+
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
