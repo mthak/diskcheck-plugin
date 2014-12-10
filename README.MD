@@ -10,4 +10,4 @@ Solution :
  The plugin checks for disk available before starting a job and fail the build is the disk is below the Threshold ( You define the Threshold in a global parameter) , 
 
 -------------
-Also there is a Global Configuration which says Disk Recycler if it's set and the disk spaceis low , then it will delete everything in the current job workspace directory,
+Also there is a Global Configuration Enable Disk Recycler if it's checked  and the disk space is low for a job , then it will delete everything in the current job workspace directory,
