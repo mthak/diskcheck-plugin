@@ -6,7 +6,7 @@
     <version>1.532.3</version>
   </parent>
 
-  <groupId>com.cloudera.diskrecycler</groupId>
+  <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>diskcheck</artifactId>
   <version>0.20</version>
   <packaging>hpi</packaging>
