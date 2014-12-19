@@ -43,13 +43,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * 
  */
 public class Diskcheck extends BuildWrapper {
-	public boolean diskcheck;
+//	public boolean diskcheck;
 	/**
 	 * Stored build steps to run before the scm checkout is called
 	 */
 	// public final ArrayList<BuildStep> buildSteps;
 
-	public boolean diskspacecheck = true;
+//	public boolean diskspacecheck = true;
 
 	public final boolean failOnError;
 
@@ -60,13 +60,13 @@ public class Diskcheck extends BuildWrapper {
 	 *            list of but steps configured in the UI
 	 */
 	@DataBoundConstructor
-	public Diskcheck(boolean failOnError, boolean diskcheck) {
+	public Diskcheck(boolean failOnError) {
 		// ArrayList myCommand = new ArrayList();
 		// myCommand.add("du-sh $WORKSPACE");
 		// this.buildSteps=myCommand;
 		// // this.buildSteps = buildstep;
 
-		this.diskcheck = true;
+	//	this.diskcheck = true;
 		this.failOnError = failOnError;
 	}
 
@@ -195,8 +195,7 @@ public class Diskcheck extends BuildWrapper {
 		 * This human readable name is used in the configuration screen.
 		 */
 		public String getDisplayName() {
-			// TODO localization
-			return "Check Disk Space";
+				return "Check Disk Space";
 		}
 
 	}
