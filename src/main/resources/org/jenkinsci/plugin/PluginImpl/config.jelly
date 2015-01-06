@@ -11,14 +11,14 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-  <f:section title="Disk Recycler">
+  <f:section title="Disk Recycler" name="disk-check">
     <f:entry title="Enable Disk Recycler" 
       description="Check if you need disk to be checked and recycled if low in space ">
       <f:checkbox name="diskrecyclerenabled" checked="${it.diskrecyclerenabled}" default="false" />
     </f:entry>
      <f:entry title="Threshold for disk Check(Gb)" 
-      description="Enter the disk space(in GB) that should be available on Disk before a project Starts  ">
-      <f:textbox field="spacecheck" default="1" />
+      description="Enter the disk space(in GB integer only) that should be available on Disk before a project Starts Default is 1 Gb  ">
+      <f:textbox field="spacecheck" value="${it.spacecheck}" default="1"/>
     </f:entry>
   </f:section>
 </j:jelly>
