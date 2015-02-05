@@ -98,7 +98,17 @@ public class Diskcheck extends BuildWrapper {
 		Node node1 = build.getBuiltOn();
 		Computer Comp = node1.toComputer();
 		String NodeName = build.getBuiltOnStr();
-
+        if  (Comp.getChannel()==null)
+        {
+        	log.println("Can not get slave infomration wait for 10 sec \n");
+        	Thread.sleep(10000);
+        	 if (Comp.getChannel()==null)
+        	 {
+        		 log.println("Waited long enough to get slave information exiting discheck for now \n");
+        	 System.exit(0);
+        	 }
+        	 
+        }
 		long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
 		int roundedSize = (int) (size / (1024 * 1024 * 1024));
 		log.println("Total Disk Space Available is: " + roundedSize + "Gb");
