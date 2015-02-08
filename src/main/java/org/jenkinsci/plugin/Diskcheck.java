@@ -2,7 +2,6 @@ package org.jenkinsci.plugin;
 
 import hudson.AbortException;
 import hudson.Extension;
-
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
@@ -15,7 +14,9 @@ import hudson.model.Result;
 import hudson.tasks.BatchFile;
 import hudson.tasks.CommandInterpreter;
 import hudson.tasks.Shell;
+
 import org.kohsuke.stapler.DataBoundConstructor;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -108,6 +109,11 @@ public class Diskcheck extends BuildWrapper {
         	 System.exit(0);
         	 }
         	 
+        }
+        if ( DiskSpaceMonitor.DESCRIPTOR == null )
+        {
+        	log.println(" Could not get Slave Information , Exiting Disk check for this slave");
+        	System.exit(0);
         }
 		long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
 		int roundedSize = (int) (size / (1024 * 1024 * 1024));
