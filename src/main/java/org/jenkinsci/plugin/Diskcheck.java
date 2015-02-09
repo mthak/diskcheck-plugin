@@ -99,7 +99,7 @@ public class Diskcheck extends BuildWrapper {
 		Node node1 = build.getBuiltOn();
 		Computer Comp = node1.toComputer();
 		String NodeName = build.getBuiltOnStr();
-        if  (Comp.getChannel()==null)
+    /*    if  (Comp.getChannel()==null)
         {
         	log.println("Can not get slave infomration wait for 10 sec \n");
         	Thread.sleep(10000);
@@ -110,12 +110,17 @@ public class Diskcheck extends BuildWrapper {
         	 }
         	 
         }
-        if ( DiskSpaceMonitor.DESCRIPTOR == null )
-        {
+        */
+        if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
+        {   log.println("No Slave Data available trying to get data from slave");
+            Thread.sleep(10000);
+            if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
+            {
         	log.println(" Could not get Slave Information , Exiting Disk check for this slave");
         	System.exit(0);
+            }
         }
-		long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
+        long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
 		int roundedSize = (int) (size / (1024 * 1024 * 1024));
 		log.println("Total Disk Space Available is: " + roundedSize + "Gb");
 
