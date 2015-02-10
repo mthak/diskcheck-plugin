@@ -110,7 +110,8 @@ public class Diskcheck extends BuildWrapper {
         	 }
         	 
         }
-        
+        */
+		
         if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
         {   log.println("No Slave Data available trying to get data from slave");
             Thread.sleep(10000);
@@ -119,7 +120,7 @@ public class Diskcheck extends BuildWrapper {
         	log.println(" Could not get Slave Information , Exiting Disk check for this slave");
         	System.exit(0);
         }
-        */
+        
 		long size=0;
         try 
         {
