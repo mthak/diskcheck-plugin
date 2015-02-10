@@ -110,17 +110,25 @@ public class Diskcheck extends BuildWrapper {
         	 }
         	 
         }
-        */
+        
         if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
         {   log.println("No Slave Data available trying to get data from slave");
             Thread.sleep(10000);
             if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
-            {
+            	
         	log.println(" Could not get Slave Information , Exiting Disk check for this slave");
         	System.exit(0);
-            }
         }
-        long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
+        */
+		long size=0;
+        try 
+        {
+        size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
+        }
+        catch(NullPointerException e ){
+  	      log.println("Could not get Slave Information , Exiting Disk check for this slave");
+  	      System.exit(0);
+  	      }
 		int roundedSize = (int) (size / (1024 * 1024 * 1024));
 		log.println("Total Disk Space Available is: " + roundedSize + "Gb");
 
