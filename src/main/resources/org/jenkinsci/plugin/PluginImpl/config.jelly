@@ -16,9 +16,13 @@
       description="Check if you need disk to be checked and recycled if low in space ">
       <f:checkbox name="diskrecyclerenabled" checked="${it.diskrecyclerenabled}" default="false" />
     </f:entry>
-     <f:entry title="Threshold for disk Check(Gb)" 
-      description="Enter the disk space(in GB integer only) that should be available on Disk before a project Starts Default is 1 Gb  ">
+     <f:entry title="Threshold for disk check(Gb)" 
+      description="Enter the disk space(in GB integer only) that should trigger deletion on the slave. Default is 1 Gb.">
       <f:textbox field="spacecheck" value="${it.spacecheck}" default="1"/>
+    </f:entry>
+     <f:entry title="Threshold for clear until(Gb)" 
+      description="Enter the disk space(in GB integer only) that should be available on when the above trigger is hit. Default is 2 Gb.">
+      <f:textbox field="clearuntil" value="${it.clearuntil}" default="2"/>
     </f:entry>
   </f:section>
 </j:jelly>
