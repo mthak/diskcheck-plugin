@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.532</version>
+    <version>1.542</version>
   </parent>
 
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>diskcheck</artifactId>
-  <version>0.27</version>
+  <version>0.28</version>
   <packaging>hpi</packaging>
 
   <licenses>
@@ -46,6 +46,8 @@
     </repository>
   </repositories>
 
+    
+    
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
