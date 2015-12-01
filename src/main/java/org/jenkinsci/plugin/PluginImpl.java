@@ -20,6 +20,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public class PluginImpl extends Plugin{
 	private boolean diskrecyclerenabled;
 	private int spacecheck;
+        private int clearuntil;
 	
 	 /**
      * Returns the singleton instance.
@@ -46,7 +47,8 @@ public class PluginImpl extends Plugin{
 			throws IOException, ServletException, FormException {
 		 formData=formData.getJSONObject("disk-check");
 		 spacecheck=formData.getInt("spacecheck");
-		diskrecyclerenabled=formData.getBoolean("diskrecyclerenabled");
+                 clearuntil=formData.getInt("clearuntil");
+		 diskrecyclerenabled=formData.getBoolean("diskrecyclerenabled");
 		
 		save();
 		super.configure(req, formData);
@@ -64,9 +66,18 @@ public class PluginImpl extends Plugin{
 		return spacecheck;
 	}
 	
-	public void setSpacecheck(int spaceheck) 
+	public void setSpacecheck(int spaceCheck) 
 	{
-	this.spacecheck = spacecheck;
+	this.spacecheck = spaceCheck;
+}
+        public int getClearuntil()
+	{
+		return clearuntil;
+	}
+	
+	public void setClearuntil(int clearUntil) 
+	{
+	this.clearuntil = clearUntil;
 }
 
 	public boolean isDiskrecyclerenabled() {

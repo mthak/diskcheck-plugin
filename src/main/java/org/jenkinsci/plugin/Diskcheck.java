@@ -2,6 +2,7 @@ package org.jenkinsci.plugin;
 
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
@@ -10,23 +11,20 @@ import hudson.model.Computer;
 import hudson.tasks.BuildWrapper;
 import hudson.node_monitors.*;
 import hudson.model.Node;
-import hudson.model.Result;
-import hudson.tasks.BatchFile;
-import hudson.tasks.CommandInterpreter;
-import hudson.tasks.Shell;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.UnknownHostException;
+import java.util.List;
 
 
 
 /**
  * Class to allow any build step to be performed before the SCM checkout occurs.
  * 
- * @author Manoj Thakkar
+ * @author Manoj Thakkar edited by Frano Stanisic
  * 
  */
 
@@ -35,12 +33,26 @@ public class Diskcheck extends BuildWrapper {
 
 
 	public final boolean failOnError;
-
+        
+        public static FilePath lastFileModified(PrintStream log, FilePath dir) throws UnknownHostException, IOException, InterruptedException {
+            log.println("lastFileModified call made");
+            log.println("dir passed was " + dir);
+            List<FilePath> files = dir.listDirectories();
+            long lastMod = Long.MAX_VALUE;
+            FilePath choice = null;
+            for (FilePath file : files) {
+                if (file.lastModified() < lastMod) {
+                    choice = file;
+                    lastMod = file.lastModified();
+                }
+            }
+            return choice;
+        }        
 	/**
 	 * Constructor taking a list of buildsteps to use.
 	 * 
 	 * @param buildstep
-	 *            list of but steps configured in the UI
+	 *            list of build steps configured in the UI
 	 */
 	@DataBoundConstructor
 	public Diskcheck(boolean failOnError) {
@@ -63,7 +75,7 @@ public class Diskcheck extends BuildWrapper {
 	}
 
 	/**
-	 * Overridden precheckout step, this is where wedo all the work.
+	 * Overridden precheckout step, this is where we do all the work.
 	 * 
 	 * Checks to make sure we have some buildsteps set, and then calls the
 	 * prebuild and perform on all of them.
@@ -79,13 +91,13 @@ public class Diskcheck extends BuildWrapper {
 		public Descriptor getDescriptor() {
 	        return (Descriptor) super.getDescriptor();
 	    }
+                
 	@Override
 	public void preCheckout(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
 		PrintStream log = listener.getLogger();
 // Default value of disk space check is 1Gb		
-		int SpaceThreshold;
-		SpaceThreshold = PluginImpl.getInstance().getSpacecheck();
+		int SpaceThreshold = PluginImpl.getInstance().getSpacecheck();
 		
 
 		log.println("Disk space threshold is set to :" + SpaceThreshold + "Gb");
@@ -121,15 +133,7 @@ public class Diskcheck extends BuildWrapper {
         	System.exit(0);
         }
         
-		long size=0;
-        try 
-        {
-        size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
-        }
-        catch(NullPointerException e ){
-  	      log.println("Could not get Slave Information , Exiting Disk check for this slave");
-  	      System.exit(0);
-  	      }
+		long size = build.getWorkspace().getParent().getUsableDiskSpace();
 		int roundedSize = (int) (size / (1024 * 1024 * 1024));
 		log.println("Total Disk Space Available is: " + roundedSize + "Gb");
 
@@ -141,31 +145,29 @@ public class Diskcheck extends BuildWrapper {
 	
 		if (PluginImpl.getInstance().isDiskrecyclerenabled()) {
 			if (roundedSize < SpaceThreshold) {
-				log.println("Disk Recycler is Enabled so I am going to wipe off the workspace Directory Now ");
-				String mycommand = "echo $WORKSPACE; rm -rf $WORKSPACE/../; df -k .";
-				String mywincommand = "echo Deleting file from %WORKSPACE% && Del /R %WORKSPACE%";
-
-				/**
-				 * This method will return the command intercepter as per the
-				 * node OS
-				 * 
-				 * @param launcher
-				 * @param script
-				 * @return CommandInterpreter
-				 */
-				CommandInterpreter runscript;
-				if (launcher.isUnix())
-					runscript = new Shell(mycommand);
-				else
-					runscript = new BatchFile(mywincommand);
-
-				Result result = runscript.perform(build, launcher, listener) ? Result.SUCCESS
-						: Result.FAILURE;
-
-				if (result.toString() == "FAILURE") {
-					throw new AbortException(
-							"Something went wrong while deleting Files , Please check the error message above");
-				}
+                                int clearUntil = PluginImpl.getInstance().getClearuntil();
+                                if (clearUntil < SpaceThreshold){
+                                    throw new AbortException(
+					"Your space clearing thresholds are the wrong way around."
+                                                + " Edit them and run this job again.");
+                                }
+                                // Not enough room on slave, start clearing until threshhold met.
+                                while(roundedSize < clearUntil){
+                                FilePath lastUsedDir = lastFileModified(log, build.getWorkspace().getParent());
+                                if (lastUsedDir == null){
+                                    throw new AbortException(
+					"There is nothing left in the workspace, but room still needs to be made."
+                                                + " Either the thresholds are wrong, or there is a major issue on the slave.");
+                                }
+                                log.println("Workspace selected was " + lastUsedDir.getRemote() + ". Goodbye!");
+				// Use Jenkins internal api to delete files recursively.
+				// On any errors the exception will bubble up causing the
+				// build to fail.
+				lastUsedDir.deleteRecursive();    
+                                size = build.getWorkspace().getParent().getUsableDiskSpace();
+                                roundedSize = (int) (size / (1024 * 1024 * 1024));
+                                log.println("New disk space available is: " + roundedSize);
+                        }
 			}
 		}
 
