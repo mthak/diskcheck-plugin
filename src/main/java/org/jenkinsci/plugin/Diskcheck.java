@@ -146,6 +146,11 @@ public class Diskcheck extends BuildWrapper {
 		if (PluginImpl.getInstance().isDiskrecyclerenabled()) {
 			if (roundedSize < SpaceThreshold) {
                                 int clearUntil = PluginImpl.getInstance().getClearuntil();
+                                if (clearUntil == 0){
+                                    log.println("clearUntil set to 0, clearing everything...");
+                                    build.getWorkspace().getParent().deleteRecursive();
+                                    log.println("aaaaaaaaand it's gone.");
+                                }else{
                                 if (clearUntil < SpaceThreshold){
                                     throw new AbortException(
 					"Your space clearing thresholds are the wrong way around."
@@ -169,6 +174,7 @@ public class Diskcheck extends BuildWrapper {
                                 log.println("New disk space available is: " + roundedSize);
                         }
 			}
+                        }
 		}
 
 		log.println("Running Prebuild steps");

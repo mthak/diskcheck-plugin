@@ -21,7 +21,7 @@
       <f:textbox field="spacecheck" value="${it.spacecheck}" default="1"/>
     </f:entry>
      <f:entry title="Threshold for clear until(Gb)" 
-      description="Enter the disk space(in GB integer only) that should be available on when the above trigger is hit. Default is 2 Gb.">
+      description="Enter the disk space(in GB integer only) that should be available on when the above trigger is hit. Default is 2 Gb. If this is set to 0, everything will be deleted.">
       <f:textbox field="clearuntil" value="${it.clearuntil}" default="2"/>
     </f:entry>
   </f:section>
