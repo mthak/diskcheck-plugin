@@ -137,12 +137,9 @@ public class Diskcheck extends BuildWrapper {
         DiskSpaceMonitorDescriptor.DiskSpace diskSpaceMonitor = new DiskSpaceMonitorDescriptor.DiskSpace(baseName, size);
             diskSpace= diskSpaceMonitor.getGbLeft();
        }
-        log.println ( "Total Disk space in workspace 12is "+ diskSpace);
+        log.println ( "Total Disk space in workspace is "+ diskSpace);
         
-        long mydisk = Long.parseLong(diskSpace);
-        log.println("data is " + mydisk);
         mysize = (int) (Long.parseLong(diskSpace) / (1024 * 1024 * 1024));
-        log.println("my size is"+ mysize);
         roundedSize = (int) (size / (1024 * 1024 * 1024));
         
         }
@@ -173,7 +170,6 @@ public class Diskcheck extends BuildWrapper {
 						+ "fi; "
 						+ "df -h .; "
 						+ "cd ${WORKSPACE} ";
-			log.println(" Command is " + myShellCommand);	
 						
 			String myWinCommand = "echo Deleting file from %WORKSPACE% && Del /R %WORKSPACE%";
 				/**
