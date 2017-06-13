@@ -37,7 +37,7 @@ import hudson.node_monitors.DiskSpaceMonitorDescriptor;
 
 public class Diskcheck extends BuildWrapper {
 
-	
+
 	public final boolean failOnError;
 
 	/**
@@ -78,22 +78,22 @@ public class Diskcheck extends BuildWrapper {
 	 * @param launcher
 	 * @param listener
 	 */
-	
-	 @Override
-		public Descriptor getDescriptor() {
-	        return (Descriptor) super.getDescriptor();
-	    }
-	 
-	 
-	
+
+	@Override
+	public Descriptor getDescriptor() {
+		return (Descriptor) super.getDescriptor();
+	}
+
+
+
 	@Override
 	public void preCheckout(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
 		PrintStream log = listener.getLogger();
-// Default value of disk space check is 1Gb		
+		// Default value of disk space check is 1Gb		
 		int SpaceThreshold;
 		SpaceThreshold = PluginImpl.getInstance().getSpacecheck();
-		
+
 
 		log.println("Disk space threshold is set to :" + SpaceThreshold + "Gb");
 		log.println("Checking disk space Now ");
@@ -104,57 +104,56 @@ public class Diskcheck extends BuildWrapper {
 		}
 
 		Node node1 = build.getBuiltOn();
-		
+
 		Computer Comp = node1.toComputer();
-		
+
 		String NodeName = build.getBuiltOnStr();
-		if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
-        {   log.println("No Slave Data available trying to get data from slave");
-            Thread.sleep(1000);
-            if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
-            	
-        	log.println(" Could not get Slave Information , Exiting Disk check for this slave");
-        	return;
-        }
-        
+
 		int roundedSize=0;
-        int mysize=0;
 		try 
-        {
-        	
-        		AbstractDiskSpaceMonitor.getAll();
-        long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
-        String baseName = build.getWorkspace().getBaseName();
-        String buildWorkSpace = build.getWorkspace().toString();
-        String buildScript = String.format("new File(\"%s\").getFreeSpace()",buildWorkSpace);
-     
-      //  String S = "%s".getFreeSpace)basename.getFreeSapce()"
-       // String S = String
-        String diskSpace = RemotingDiagnostics.executeGroovy(buildScript, Comp.getChannel());
-        diskSpace = diskSpace.split(":")[diskSpace.split(" ").length-1].replaceAll("\\s+","");
-       // If we can not get the disk space from remote diagnostic we shall use the diskcheck as a backup
-       if ( diskSpace == null) { 
-        DiskSpaceMonitorDescriptor.DiskSpace diskSpaceMonitor = new DiskSpaceMonitorDescriptor.DiskSpace(baseName, size);
-            diskSpace= diskSpaceMonitor.getGbLeft();
-       }
-        log.println ( "Total Disk space in workspace is "+ diskSpace);
-        
-        mysize = (int) (Long.parseLong(diskSpace) / (1024 * 1024 * 1024));
-        roundedSize = (int) (size / (1024 * 1024 * 1024));
-        
-        }
-        catch(NullPointerException e ){
-    	      log.println("Could not get Slave disk size Information , Exiting Disk check for this slave");
-    	        return;
-    	      }
-       log.println("Total Disk Space Available is: " + roundedSize + "Gb");
-        
+		{
+			if ( Comp != null) {
+
+				String baseName = build.getWorkspace().getBaseName();
+				String buildWorkSpace = build.getWorkspace().toString();
+				String buildScript = String.format("new File(\"%s\").getFreeSpace()",buildWorkSpace);
+
+				String diskSpace = RemotingDiagnostics.executeGroovy(buildScript, Comp.getChannel());
+				diskSpace = diskSpace.split(":")[diskSpace.split(" ").length-1].replaceAll("\\s+","");
+				// If we can not get the disk space from remote diagnostic we shall use the diskcheck as a backup
+				log.println("diskspace is "+ diskSpace);
+				if ( diskSpace == null) {
+					if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
+					{   log.println("No Slave Data available trying to get data from slave");
+					Thread.sleep(1000);
+					if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
+
+						log.println(" Could not get Slave Information , Exiting Disk check for this slave");
+					return;
+					}
+					AbstractDiskSpaceMonitor.getAll();
+					long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
+					DiskSpaceMonitorDescriptor.DiskSpace diskSpaceMonitor = new DiskSpaceMonitorDescriptor.DiskSpace(baseName, size);
+					diskSpace= diskSpaceMonitor.getGbLeft();
+				}
+				log.println ( "Total Disk space in workspace is "+ diskSpace);
+
+				roundedSize = (int) (Long.parseLong(diskSpace) / (1024 * 1024 * 1024));
+				//roundedSize = (int) (size / (1024 * 1024 * 1024));
+			}
+		}
+		catch(NullPointerException e ){
+			log.println("Could not get Slave disk size Information , Exiting Disk check for this slave");
+			return;
+		}
+		log.println("Total Disk Space Available is: " + roundedSize + "Gb");
+
 		if (build.getBuiltOnStr() == "") {
 			NodeName = "master";
 		}
 
 		log.println(" Node Name: " + NodeName);
-	
+
 		if (PluginImpl.getInstance().isDiskrecyclerenabled()) {
 			if (roundedSize < SpaceThreshold) {
 				log.println("Disk Recycler is Enabled, wipe off the workspace Directory Now ");
@@ -162,16 +161,16 @@ public class Diskcheck extends BuildWrapper {
 				String myShellCommand = " "
 						+ "echo ${WORKSPACE}; "
 						+ "if [ $(basename $(dirname `pwd`)) = 'workspace' ];then "
-						  +   " cd $(dirname ${WORKSPACE}) ;"
+						+   " cd $(dirname ${WORKSPACE}) ;"
 						+ 	  "find * -maxdepth 1 -type d ! -name $(basename ${WORKSPACE}) -delete ;"
 						+ "else "
-						    + "echo Could not delete Workspace completly ;"
-						    + "true ;"
+						+ "echo Could not delete Workspace completly ;"
+						+ "true ;"
 						+ "fi; "
 						+ "df -h .; "
 						+ "cd ${WORKSPACE} ";
-						
-			String myWinCommand = "echo Deleting file from %WORKSPACE% && Del /R %WORKSPACE%";
+
+				String myWinCommand = "echo Deleting file from %WORKSPACE% && Del /R %WORKSPACE%";
 				/**
 				 * This method will return the command intercepter as per the
 				 * node OS
@@ -205,27 +204,27 @@ public class Diskcheck extends BuildWrapper {
 		}
 	}
 
-	
+
 	@Extension
 	public static final class DescriptorImpl extends Descriptor<BuildWrapper> {
-	
+
 		/**
 		 * This human readable name is used in the configuration screen.
 		 */
 		public String getDisplayName() {
-				return "Enable Disk Check";
+			return "Enable Disk Check";
 		}
-		
-		
-		
+
+
+
 		public DescriptorImpl() {
-            load();
-        }
-		
+			load();
+		}
+
 
 	}
-	
-	
+
+
 	class NoopEnv extends Environment {
 	}
 }
