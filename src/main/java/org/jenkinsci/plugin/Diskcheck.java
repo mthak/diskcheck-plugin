@@ -2,6 +2,7 @@ package org.jenkinsci.plugin;
 
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
@@ -14,12 +15,15 @@ import hudson.model.Result;
 import hudson.tasks.BatchFile;
 import hudson.tasks.CommandInterpreter;
 import hudson.tasks.Shell;
+import hudson.util.RemotingDiagnostics;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+
+import hudson.node_monitors.DiskSpaceMonitorDescriptor;
 
 
 
@@ -33,7 +37,7 @@ import java.io.PrintStream;
 
 public class Diskcheck extends BuildWrapper {
 
-
+	
 	public final boolean failOnError;
 
 	/**
@@ -79,6 +83,9 @@ public class Diskcheck extends BuildWrapper {
 		public Descriptor getDescriptor() {
 	        return (Descriptor) super.getDescriptor();
 	    }
+	 
+	 
+	
 	@Override
 	public void preCheckout(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
@@ -97,30 +104,54 @@ public class Diskcheck extends BuildWrapper {
 		}
 
 		Node node1 = build.getBuiltOn();
+		
 		Computer Comp = node1.toComputer();
+		
 		String NodeName = build.getBuiltOnStr();
-   	
-        if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
+		if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
         {   log.println("No Slave Data available trying to get data from slave");
-            Thread.sleep(10000);
+            Thread.sleep(1000);
             if ( DiskSpaceMonitor.DESCRIPTOR.get(Comp)== null )
             	
         	log.println(" Could not get Slave Information , Exiting Disk check for this slave");
-        	System.exit(0);
+        	return;
         }
         
 		int roundedSize=0;
-        try 
+        int mysize=0;
+		try 
         {
+        	
+        		AbstractDiskSpaceMonitor.getAll();
         long size = DiskSpaceMonitor.DESCRIPTOR.get(Comp).size;
+        String baseName = build.getWorkspace().getBaseName();
+        String buildWorkSpace = build.getWorkspace().toString();
+        String buildScript = String.format("new File(\"%s\").getFreeSpace()",buildWorkSpace);
+     
+      //  String S = "%s".getFreeSpace)basename.getFreeSapce()"
+       // String S = String
+        String diskSpace = RemotingDiagnostics.executeGroovy(buildScript, Comp.getChannel());
+        diskSpace = diskSpace.split(":")[diskSpace.split(" ").length-1].replaceAll("\\s+","");
+       // If we can not get the disk space from remote diagnostic we shall use the diskcheck as a backup
+       if ( diskSpace == null) { 
+        DiskSpaceMonitorDescriptor.DiskSpace diskSpaceMonitor = new DiskSpaceMonitorDescriptor.DiskSpace(baseName, size);
+            diskSpace= diskSpaceMonitor.getGbLeft();
+       }
+        log.println ( "Total Disk space in workspace 12is "+ diskSpace);
+        
+        long mydisk = Long.parseLong(diskSpace);
+        log.println("data is " + mydisk);
+        mysize = (int) (Long.parseLong(diskSpace) / (1024 * 1024 * 1024));
+        log.println("my size is"+ mysize);
         roundedSize = (int) (size / (1024 * 1024 * 1024));
+        
         }
         catch(NullPointerException e ){
     	      log.println("Could not get Slave disk size Information , Exiting Disk check for this slave");
-    	      System.exit(0);
+    	        return;
     	      }
        log.println("Total Disk Space Available is: " + roundedSize + "Gb");
-
+        
 		if (build.getBuiltOnStr() == "") {
 			NodeName = "master";
 		}
@@ -129,10 +160,22 @@ public class Diskcheck extends BuildWrapper {
 	
 		if (PluginImpl.getInstance().isDiskrecyclerenabled()) {
 			if (roundedSize < SpaceThreshold) {
-				log.println("Disk Recycler is Enabled so I am going to wipe off the workspace Directory Now ");
-				String mycommand = "echo $WORKSPACE; rm -rf $WORKSPACE/../; df -k .";
-				String mywincommand = "echo Deleting file from %WORKSPACE% && Del /R %WORKSPACE%";
-
+				log.println("Disk Recycler is Enabled, wipe off the workspace Directory Now ");
+				//TODO change this to a stringBuilder
+				String myShellCommand = " "
+						+ "echo ${WORKSPACE}; "
+						+ "if [ $(basename $(dirname `pwd`)) = 'workspace' ];then "
+						  +   " cd $(dirname ${WORKSPACE}) ;"
+						+ 	  "find * -maxdepth 1 -type d ! -name $(basename ${WORKSPACE}) -delete ;"
+						+ "else "
+						    + "echo Could not delete Workspace completly ;"
+						    + "true ;"
+						+ "fi; "
+						+ "df -h .; "
+						+ "cd ${WORKSPACE} ";
+			log.println(" Command is " + myShellCommand);	
+						
+			String myWinCommand = "echo Deleting file from %WORKSPACE% && Del /R %WORKSPACE%";
 				/**
 				 * This method will return the command intercepter as per the
 				 * node OS
@@ -143,9 +186,9 @@ public class Diskcheck extends BuildWrapper {
 				 */
 				CommandInterpreter runscript;
 				if (launcher.isUnix())
-					runscript = new Shell(mycommand);
+					runscript = new Shell(myShellCommand);
 				else
-					runscript = new BatchFile(mywincommand);
+					runscript = new BatchFile(myWinCommand);
 
 				Result result = runscript.perform(build, launcher, listener) ? Result.SUCCESS
 						: Result.FAILURE;
@@ -174,7 +217,7 @@ public class Diskcheck extends BuildWrapper {
 		 * This human readable name is used in the configuration screen.
 		 */
 		public String getDisplayName() {
-				return "Check Disk Space";
+				return "Enable Disk Check";
 		}
 		
 		
