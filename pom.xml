@@ -18,6 +18,14 @@
     </license>
   </licenses>
 
+<dependencies>
+  <dependency>
+       <groupId>org.jvnet.hudson</groupId>
+        <artifactId>xstream</artifactId>
+         <version>1.4.7-jenkins-1</version>
+         <scope>test</scope>
+       </dependency>
+</dependencies>
 <distributionManagement>
    <repository>
     <id>maven.jenkins-ci.org</id>
