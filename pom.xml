@@ -8,7 +8,7 @@
 
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>diskcheck</artifactId>
-  <version>0.29-SNAPSHOT</version>
+  <version>0.29</version>
   <packaging>hpi</packaging>
 
   <licenses>
@@ -29,7 +29,7 @@
 <distributionManagement>
    <repository>
     <id>maven.jenkins-ci.org</id>
-    <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+    <url>https://repo.jenkins-ci.org/releases/</url>
    </repository>
   </distributionManagement>
 
