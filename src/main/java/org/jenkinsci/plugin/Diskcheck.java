@@ -119,7 +119,12 @@ public class Diskcheck extends BuildWrapper {
 				String buildScript = String.format("new File(\"%s\").getFreeSpace()",buildWorkSpace);
 
 				String diskSpace = RemotingDiagnostics.executeGroovy(buildScript, Comp.getChannel());
-				diskSpace = diskSpace.split(":")[diskSpace.split(" ").length-1].replaceAll("\\s+","");
+				try { 
+					diskSpace = diskSpace.split(":")[diskSpace.split(" ").length-1].replaceAll("\\s+","");
+				}
+				catch (Exception e){
+					diskSpace = null;
+				}
 				// If we can not get the disk space from remote diagnostic we shall use the diskcheck as a backup
 				log.println("diskspace is "+ diskSpace);
 				if ( diskSpace == null) {
