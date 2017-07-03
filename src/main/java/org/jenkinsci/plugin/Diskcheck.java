@@ -99,10 +99,11 @@ public class Diskcheck extends BuildWrapper {
 		log.println("Checking disk space Now ");
 
 		/* touch workspace so that it is created on first time */
-		if (!build.getWorkspace().exists()) {
-			build.getWorkspace().mkdirs();
-		}
-
+			String WorkspaceDir = build.getWorkspace().toString();
+			if ( WorkspaceDir == null) {
+			  build.getWorkspace().mkdirs();
+		    }
+	
 		Node node1 = build.getBuiltOn();
 
 		Computer Comp = node1.toComputer();
@@ -153,7 +154,7 @@ public class Diskcheck extends BuildWrapper {
 		}
 		log.println("Total Disk Space Available is: " + roundedSize + "Gb");
 
-		if (build.getBuiltOnStr() == "") {
+		if (build.getBuiltOnStr().equals("")) {
 			NodeName = "master";
 		}
 
@@ -193,7 +194,7 @@ public class Diskcheck extends BuildWrapper {
 				Result result = runscript.perform(build, launcher, listener) ? Result.SUCCESS
 						: Result.FAILURE;
 
-				if (result.toString() == "FAILURE") {
+				if (result.toString().equals("FAILURE")) {
 					throw new AbortException(
 							"Something went wrong while deleting Files , Please check the error message above");
 				}
