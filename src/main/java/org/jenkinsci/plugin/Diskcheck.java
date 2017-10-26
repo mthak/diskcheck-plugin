@@ -112,7 +112,7 @@ public class Diskcheck extends BuildWrapper {
             if (DiskSpaceMonitor.DESCRIPTOR.get(Comp) == null) {
                 log.println("Could not retrieve slave data, exiting disk check for this slave.");
             }
-            System.exit(0);
+            return;
         }
         // End unsure bit.
 
