@@ -1,12 +1,13 @@
 package org.jenkinsci.plugin;
 
+import hudson.AbortException;
 import hudson.Plugin;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Hudson;
 
 import java.io.IOException;
 
 import javax.servlet.ServletException;
+import jenkins.model.Jenkins;
 
 import net.sf.json.JSONObject;
 
@@ -22,9 +23,17 @@ public class PluginImpl extends Plugin {
      * Returns the singleton instance.
      *
      * @return the one.
+     * @throws hudson.AbortException
+     * If Jenkins instance is not ready
      */
-    public static PluginImpl getInstance() {
-        return Hudson.getInstance().getPlugin(PluginImpl.class);
+    public static PluginImpl getInstance() throws AbortException {
+        // To remove warning. I don't think this would ever be null in our case.
+        Jenkins instance = Jenkins.getInstance();
+        if (instance == null) {
+            throw new AbortException(
+                    "Can't access Jenkins instance, it may not be ready.");
+        }
+        return instance.getPlugin(PluginImpl.class);
     }
 
     @Override

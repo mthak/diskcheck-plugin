@@ -88,11 +88,18 @@ public class Diskcheck extends BuildWrapper {
         log.println("Checking disk space now ...");
 
         // Touch workspace so that it is created on first time.
-        if (!build.getWorkspace().exists()) {
-            build.getWorkspace().mkdirs();
+        FilePath workspacePath = build.getWorkspace();
+        if (workspacePath == null) {
+            return;
+        }
+        if (!workspacePath.exists()) {
+            workspacePath.mkdirs();
         }
 
         Node node1 = build.getBuiltOn();
+        if (node1 == null) {
+            return;
+        }
         Computer Comp = node1.toComputer();
         String NodeName = build.getBuiltOnStr();
 
@@ -108,7 +115,7 @@ public class Diskcheck extends BuildWrapper {
         }
         // End unsure bit.
 
-        long size = build.getWorkspace().getParent().getUsableDiskSpace();
+        long size = workspacePath.getParent().getUsableDiskSpace();
         int roundedSize = (int) (size / (1024 * 1024 * 1024));
         log.println("Total disk space available is: " + roundedSize + "GB");
 
@@ -124,7 +131,7 @@ public class Diskcheck extends BuildWrapper {
                 if (clearUntil == 0) {
                     log.println("clearUntil set to 0, clearing everything ...");
                     // Jenkins api recursive delete, errors will cause a build failure.
-                    build.getWorkspace().getParent().deleteRecursive();
+                    workspacePath.getParent().deleteRecursive();
                     log.println("All workspaces deleted successfully.");
                 } else {
                     if (clearUntil < SpaceThreshold) {
@@ -134,7 +141,7 @@ public class Diskcheck extends BuildWrapper {
                     }
                     // Not enough room on slave, start clearing until threshhold met.
                     while (roundedSize < clearUntil) {
-                        FilePath lastUsedDir = lastFileModified(log, build.getWorkspace().getParent());
+                        FilePath lastUsedDir = lastFileModified(log, workspacePath.getParent());
                         if (lastUsedDir == null) {
                             throw new AbortException(
                                     "There is nothing left in the workspace, but room still needs to be made."
@@ -144,7 +151,7 @@ public class Diskcheck extends BuildWrapper {
                         // Jenkins api recursive delete, errors will cause a build failure.
                         lastUsedDir.deleteRecursive();
                         log.println("Workspace deleted.");
-                        size = build.getWorkspace().getParent().getUsableDiskSpace();
+                        size = workspacePath.getParent().getUsableDiskSpace();
                         roundedSize = (int) (size / (1024 * 1024 * 1024));
                         log.println("New disk space available is: " + roundedSize + "GB");
                     }
