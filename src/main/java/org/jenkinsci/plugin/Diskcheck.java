@@ -46,8 +46,6 @@ public class Diskcheck extends BuildWrapper {
 
     /**
      * Constructor taking a list of buildsteps to use.
-     *
-     * @param buildstep list of build steps configured in the UI
      */
     @DataBoundConstructor
     public Diskcheck(boolean failOnError) {
@@ -58,9 +56,6 @@ public class Diskcheck extends BuildWrapper {
      * Overridden setup returns a noop class as we don't want to add anything
      * here.
      *
-     * @param build
-     * @param launcher
-     * @param listener
      * @return noop Environment class
      */
     @Override
@@ -74,11 +69,8 @@ public class Diskcheck extends BuildWrapper {
      * Checks to make sure we have some buildsteps set, and then calls the
      * prebuild and perform on all of them.
      *
-     * @todo handle build steps failure in some sort of reasonable way
+     * TODO handle build steps failure in some sort of reasonable way
      *
-     * @param build
-     * @param launcher
-     * @param listener
      */
     @Override
     public Descriptor getDescriptor() {
@@ -175,6 +167,7 @@ public class Diskcheck extends BuildWrapper {
         /**
          * This human readable name is used in the configuration screen.
          */
+        @Override
         public String getDisplayName() {
             return "Check Disk Space";
         }
